@@ -395,6 +395,19 @@ export default function ContactForm() {
                             form.setValue('countryIso2', iso2);
                           }} 
                           defaultValue={`US:${field.value}`}
+                          onOpenChange={(open) => {
+                            if (open) {
+                              // Reset search when opening
+                              setCountrySearch("");
+                              // Autofocus search input after a small delay to ensure DOM is ready
+                              setTimeout(() => {
+                                const searchInput = document.querySelector('[data-testid="search-country"]') as HTMLInputElement;
+                                if (searchInput) {
+                                  searchInput.focus();
+                                }
+                              }, 100);
+                            }
+                          }}
                         >
                           <FormControl>
                             <SelectTrigger data-testid="select-country-code" className="px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all">
@@ -402,7 +415,7 @@ export default function ContactForm() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="max-h-60">
-                            <div className="p-2 border-b">
+                            <div className="sticky top-0 bg-white p-2 border-b z-10">
                               <div className="relative">
                                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                                 <Input
@@ -411,6 +424,7 @@ export default function ContactForm() {
                                   onChange={(e) => setCountrySearch(e.target.value)}
                                   className="pl-8 h-8 text-sm"
                                   data-testid="search-country"
+                                  autoFocus
                                 />
                               </div>
                             </div>

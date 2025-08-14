@@ -5,7 +5,7 @@ This is a full-stack web application built with React, Express, and PostgreSQL. 
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
-Recent feature request: Enhanced country dropdown with alphabetical sorting, comprehensive dataset, and search functionality.
+Recent feature request: Enhanced country dropdown with alphabetical sorting, comprehensive dataset, search functionality, persistent search field at top, and autofocus on open.
 
 # System Architecture
 
