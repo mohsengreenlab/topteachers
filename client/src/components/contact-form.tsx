@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -224,19 +224,88 @@ type ContactFormData = z.infer<typeof contactFormSchema>;
 export default function ContactForm() {
   const [recaptchaToken, setRecaptchaToken] = useState<string>("");
   const [countrySearch, setCountrySearch] = useState<string>("");
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState<boolean>(false);
+  const [isComposing, setIsComposing] = useState<boolean>(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // Filter countries based on search
+  // Debounced search to improve performance
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(countrySearch);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [countrySearch]);
+
+  // Filter countries based on debounced search
   const filteredCountries = useMemo(() => {
-    if (!countrySearch.trim()) return allCountries;
-    const searchLower = countrySearch.toLowerCase();
+    if (!debouncedSearch.trim()) return allCountries;
+    const searchLower = debouncedSearch.toLowerCase();
     return allCountries.filter(
       (country) =>
         country.name.toLowerCase().includes(searchLower) ||
-        country.dialCode.includes(countrySearch) ||
-        country.dialCode.replace('+', '').includes(countrySearch)
+        country.dialCode.includes(debouncedSearch) ||
+        country.dialCode.replace('+', '').includes(debouncedSearch)
     );
-  }, [countrySearch]);
+  }, [debouncedSearch]);
+
+  // Focus management
+  const focusSearchInput = useCallback(() => {
+    if (searchInputRef.current && isCountryDropdownOpen) {
+      searchInputRef.current.focus();
+    }
+  }, [isCountryDropdownOpen]);
+
+  useEffect(() => {
+    if (isCountryDropdownOpen) {
+      // Use setTimeout to ensure the DOM is ready
+      const timer = setTimeout(focusSearchInput, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isCountryDropdownOpen, focusSearchInput]);
+
+  // Prevent focus theft from dropdown container
+  const handleDropdownMouseDown = useCallback((e: React.MouseEvent) => {
+    // Only prevent default if clicking on the dropdown container, not on SelectItems
+    const target = e.target as HTMLElement;
+    if (target.closest('[role="option"]')) return;
+    e.preventDefault();
+  }, []);
+
+  // Handle search input changes with IME support
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isComposing) {
+      setCountrySearch(e.target.value);
+    }
+  }, [isComposing]);
+
+  const handleCompositionStart = useCallback(() => {
+    setIsComposing(true);
+  }, []);
+
+  const handleCompositionEnd = useCallback((e: React.CompositionEvent<HTMLInputElement>) => {
+    setIsComposing(false);
+    setCountrySearch(e.currentTarget.value);
+  }, []);
+
+  // Handle keyboard navigation in dropdown
+  const handleSearchKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setIsCountryDropdownOpen(false);
+      setCountrySearch("");
+    }
+    // Allow arrow keys and enter to navigate to options
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
+      const firstOption = document.querySelector('[role="option"]') as HTMLElement;
+      if (firstOption && e.key === 'ArrowDown') {
+        e.preventDefault();
+        firstOption.focus();
+      }
+    }
+  }, []);
 
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
@@ -393,19 +462,14 @@ export default function ContactForm() {
                             const [iso2, dialCode] = value.split(':');
                             field.onChange(dialCode);
                             form.setValue('countryIso2', iso2);
+                            setIsCountryDropdownOpen(false);
+                            setCountrySearch("");
                           }} 
                           defaultValue={`US:${field.value}`}
                           onOpenChange={(open) => {
+                            setIsCountryDropdownOpen(open);
                             if (open) {
-                              // Reset search when opening
                               setCountrySearch("");
-                              // Autofocus search input after a small delay to ensure DOM is ready
-                              setTimeout(() => {
-                                const searchInput = document.querySelector('[data-testid="search-country"]') as HTMLInputElement;
-                                if (searchInput) {
-                                  searchInput.focus();
-                                }
-                              }, 100);
                             }
                           }}
                         >
@@ -414,28 +478,53 @@ export default function ContactForm() {
                               <SelectValue />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="max-h-60">
+                          <SelectContent 
+                            className="max-h-60"
+                            onMouseDown={handleDropdownMouseDown}
+                          >
                             <div className="sticky top-0 bg-white p-2 border-b z-10">
                               <div className="relative">
-                                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
                                 <Input
+                                  ref={searchInputRef}
                                   placeholder="Search country or code..."
                                   value={countrySearch}
-                                  onChange={(e) => setCountrySearch(e.target.value)}
+                                  onChange={handleSearchChange}
+                                  onCompositionStart={handleCompositionStart}
+                                  onCompositionEnd={handleCompositionEnd}
+                                  onKeyDown={handleSearchKeyDown}
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                  onFocus={(e) => e.stopPropagation()}
                                   className="pl-8 h-8 text-sm"
                                   data-testid="search-country"
-                                  autoFocus
+                                  autoComplete="off"
+                                  role="searchbox"
+                                  aria-label="Search countries"
                                 />
                               </div>
                             </div>
-                            <div className="max-h-48 overflow-y-auto">
+                            <div 
+                              className="max-h-48 overflow-y-auto"
+                              onMouseDown={(e) => {
+                                // Allow clicks on options to work properly
+                                const target = e.target as HTMLElement;
+                                if (!target.closest('[role="option"]')) {
+                                  e.preventDefault();
+                                }
+                              }}
+                            >
                               {filteredCountries.map((country) => (
-                                <SelectItem key={country.iso2} value={`${country.iso2}:${country.dialCode}`}>
+                                <SelectItem 
+                                  key={country.iso2} 
+                                  value={`${country.iso2}:${country.dialCode}`}
+                                  tabIndex={-1}
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                >
                                   {country.flag} {country.name} ({country.dialCode})
                                 </SelectItem>
                               ))}
                               {filteredCountries.length === 0 && (
-                                <div className="p-4 text-center text-gray-500 text-sm">
+                                <div className="p-4 text-center text-gray-500 text-sm" tabIndex={-1}>
                                   No countries found
                                 </div>
                               )}
