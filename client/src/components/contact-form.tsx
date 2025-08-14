@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
+import ReCAPTCHA from "react-google-recaptcha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -587,21 +588,31 @@ export default function ContactForm() {
                 )}
               />
               
-              {/* reCAPTCHA placeholder - would be implemented with react-google-recaptcha */}
+              {/* reCAPTCHA */}
               <div className="flex justify-center">
-                <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <p className="text-gray-600">reCAPTCHA verification would appear here</p>
-                  <p className="text-sm text-gray-500 mt-2">Click here to simulate verification</p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="mt-4"
-                    onClick={() => setRecaptchaToken("demo-token")}
-                    data-testid="button-recaptcha"
-                  >
-                    Verify (Demo)
-                  </Button>
-                </div>
+                {import.meta.env.VITE_CAPTCHA_SITE_KEY ? (
+                  <ReCAPTCHA
+                    sitekey={import.meta.env.VITE_CAPTCHA_SITE_KEY}
+                    onChange={(token) => setRecaptchaToken(token || "")}
+                    onExpired={() => setRecaptchaToken("")}
+                    onErrored={() => setRecaptchaToken("")}
+                    data-testid="recaptcha"
+                  />
+                ) : (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                    <p className="text-yellow-700 font-medium">reCAPTCHA Configuration Needed</p>
+                    <p className="text-sm text-yellow-600 mt-1">Please add your Google reCAPTCHA site key to enable verification</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mt-3"
+                      onClick={() => setRecaptchaToken("demo-token")}
+                      data-testid="button-recaptcha-demo"
+                    >
+                      Use Demo Mode
+                    </Button>
+                  </div>
+                )}
               </div>
               
               <div className="text-center">

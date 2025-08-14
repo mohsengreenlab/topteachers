@@ -107,6 +107,7 @@ SESSION_SECRET=your_very_long_random_string_here_at_least_32_characters
 # reCAPTCHA keys (get these from Google reCAPTCHA console)
 CAPTCHA_SITE_KEY=your_recaptcha_site_key
 CAPTCHA_SECRET=your_recaptcha_secret_key
+VITE_CAPTCHA_SITE_KEY=your_recaptcha_site_key
 
 # Node environment
 NODE_ENV=production

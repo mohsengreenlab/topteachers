@@ -21,13 +21,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate request body
       const validatedData = contactRequestSchema.parse(req.body);
       
-      // Verify reCAPTCHA (in production, you would verify with Google's API)
-      // For now, we'll just check that it exists
-      if (!validatedData.recaptcha) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "reCAPTCHA verification failed" 
-        });
+      // Verify reCAPTCHA with Google's API
+      const recaptchaSecret = process.env.CAPTCHA_SECRET;
+      if (!recaptchaSecret) {
+        console.warn("CAPTCHA_SECRET not configured, skipping reCAPTCHA verification");
+      } else {
+        try {
+          const recaptchaResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              secret: recaptchaSecret,
+              response: validatedData.recaptcha,
+              remoteip: req.ip || req.connection.remoteAddress || ''
+            })
+          });
+
+          const recaptchaResult = await recaptchaResponse.json();
+          
+          if (!recaptchaResult.success) {
+            console.error("reCAPTCHA verification failed:", recaptchaResult['error-codes']);
+            return res.status(400).json({ 
+              success: false, 
+              message: "reCAPTCHA verification failed. Please try again." 
+            });
+          }
+        } catch (error) {
+          console.error("reCAPTCHA verification error:", error);
+          return res.status(500).json({ 
+            success: false, 
+            message: "Verification service unavailable. Please try again later." 
+          });
+        }
       }
 
       // Remove recaptcha from data before storing

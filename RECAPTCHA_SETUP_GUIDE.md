@@ -76,6 +76,8 @@ Add these to your `/home/topteachers/projects/topteachers-app/.env` file:
 # Replace with your actual keys from Google
 CAPTCHA_SITE_KEY=6LexampleSiteKeyFromGoogle12345
 CAPTCHA_SECRET=6LexampleSecretKeyFromGoogle67890
+# Frontend needs the site key with VITE_ prefix
+VITE_CAPTCHA_SITE_KEY=6LexampleSiteKeyFromGoogle12345
 ```
 
 ### Step 6: Test Your Setup
