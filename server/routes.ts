@@ -15,6 +15,13 @@ const contactRequestSchema = insertContactSchema.extend({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Get reCAPTCHA configuration
+  app.get("/api/config/recaptcha", (req, res) => {
+    res.json({
+      siteKey: process.env.CAPTCHA_SITE_KEY || null
+    });
+  });
+
   // Contact form submission endpoint
   app.post("/api/contact", async (req, res) => {
     try {

@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Button } from "@/components/ui/button";
@@ -222,6 +222,10 @@ const contactFormSchema = z.object({
 
 type ContactFormData = z.infer<typeof contactFormSchema>;
 
+interface RecaptchaConfig {
+  siteKey: string | null;
+}
+
 export default function ContactForm() {
   const [recaptchaToken, setRecaptchaToken] = useState<string>("");
   const [countrySearch, setCountrySearch] = useState<string>("");
@@ -230,6 +234,12 @@ export default function ContactForm() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Fetch reCAPTCHA configuration from server
+  const { data: recaptchaConfig } = useQuery<RecaptchaConfig>({
+    queryKey: ['/api/config/recaptcha'],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
 
   // Debounced search to improve performance (only for filtering, not input value)
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
@@ -590,9 +600,9 @@ export default function ContactForm() {
               
               {/* reCAPTCHA */}
               <div className="flex justify-center">
-                {import.meta.env.VITE_CAPTCHA_SITE_KEY ? (
+                {recaptchaConfig?.siteKey ? (
                   <ReCAPTCHA
-                    sitekey={import.meta.env.VITE_CAPTCHA_SITE_KEY}
+                    sitekey={recaptchaConfig.siteKey}
                     onChange={(token) => setRecaptchaToken(token || "")}
                     onExpired={() => setRecaptchaToken("")}
                     onErrored={() => setRecaptchaToken("")}

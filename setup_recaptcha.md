@@ -18,7 +18,6 @@ sudo su - topteachers
 cd /home/topteachers/projects/topteachers-app
 
 # Add your actual keys (replace with your real keys from Google)
-echo "VITE_CAPTCHA_SITE_KEY=your_actual_site_key_here" >> .env
 echo "CAPTCHA_SITE_KEY=your_actual_site_key_here" >> .env
 echo "CAPTCHA_SECRET=your_actual_secret_key_here" >> .env
 
@@ -39,8 +38,7 @@ pm2 restart topteachers
 
 ## What Each Key Does
 
-- **VITE_CAPTCHA_SITE_KEY**: Shows the reCAPTCHA widget to visitors (frontend)
-- **CAPTCHA_SITE_KEY**: Used by your server for backup reference
+- **CAPTCHA_SITE_KEY**: Shows the reCAPTCHA widget to visitors (served from backend)
 - **CAPTCHA_SECRET**: Verifies submissions with Google (backend only)
 
 ## If You Don't Have Keys Yet
