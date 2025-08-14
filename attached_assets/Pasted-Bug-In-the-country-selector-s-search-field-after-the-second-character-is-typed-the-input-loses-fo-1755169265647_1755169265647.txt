@@ -1,0 +1,65 @@
+Bug
+
+In the country selector’s search field, after the second character is typed, the input loses focus and the user must click it again to continue typing.
+
+Goal
+
+Users can type continuously; the search input never loses focus while the dropdown is open.
+
+Required behavior
+
+On open, the search input is visible and autofocused.
+
+Typing any number of characters (including Backspace / Paste) does not blur the input.
+
+Works with keyboard, mouse, touch, and IME (composition) input.
+
+Filtering still matches country name and dial code, and the list remains A→Z by name.
+
+Implementation checklist (pick what applies; ensure all end-state behaviors)
+
+Do not remount the search input when query changes.
+
+Remove any key={query} or conditional rendering that replaces the input node.
+
+Keep the input outside of mapped option items; only re-render the list.
+
+Keep focus logic stable:
+
+Use a persistent ref: const ref = useRef(null);
+
+Autofocus only when opening the dropdown, e.g. useEffect(() => { if (isOpen) ref.current?.focus({ preventScroll: true }); }, [isOpen]);
+
+Do not focus list items after filtering; remove any code that sets active option and calls .focus() on it after keystrokes.
+
+Prevent state changes that toggle isOpen during typing:
+
+Ensure filtering does not set isOpen false→true (which remounts and blurs).
+
+Decouple query updates from open/close state.
+
+If debouncing filtering, debounce only the option filtering, not the input value or the input element.
+
+Avoid re-creating the dropdown container on each debounce tick.
+
+Guard against unintended blur:
+
+For internal clicks/scrolls, use onMouseDown/mousedown with e.preventDefault() on option items to stop focus theft.
+
+Ensure no handler calls .blur() on the input.
+
+Non-interactive elements inside the dropdown should have tabindex="-1".
+
+IME support: ignore filtering until compositionend; do not close or refocus during compositionstart/updated.
+
+Acceptance criteria
+
+Open the country dropdown → search field is visible and focused.
+
+Type: g, e, r, Backspace, paste text, use IME — focus never leaves the input.
+
+No dropdown close/remount occurs while typing; options update smoothly.
+
+Search still matches by name and dial code; results stay alphabetically sorted.
+
+Constraints: Single-page app; no DB/API changes; preserve existing styling and behavior everywhere else.

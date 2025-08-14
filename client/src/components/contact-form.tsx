@@ -227,15 +227,16 @@ export default function ContactForm() {
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState<boolean>(false);
   const [isComposing, setIsComposing] = useState<boolean>(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // Debounced search to improve performance
+  // Debounced search to improve performance (only for filtering, not input value)
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(countrySearch);
-    }, 100);
+    }, 150);
 
     return () => clearTimeout(timer);
   }, [countrySearch]);
@@ -252,34 +253,27 @@ export default function ContactForm() {
     );
   }, [debouncedSearch]);
 
-  // Focus management
-  const focusSearchInput = useCallback(() => {
-    if (searchInputRef.current && isCountryDropdownOpen) {
-      searchInputRef.current.focus();
+  // Focus management - stable and persistent
+  useEffect(() => {
+    if (isCountryDropdownOpen && searchInputRef.current) {
+      // Focus immediately when dropdown opens
+      const timer = setTimeout(() => {
+        if (searchInputRef.current && isCountryDropdownOpen) {
+          searchInputRef.current.focus({ preventScroll: true });
+        }
+      }, 50);
+      return () => clearTimeout(timer);
     }
   }, [isCountryDropdownOpen]);
 
-  useEffect(() => {
-    if (isCountryDropdownOpen) {
-      // Use setTimeout to ensure the DOM is ready
-      const timer = setTimeout(focusSearchInput, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [isCountryDropdownOpen, focusSearchInput]);
-
-  // Prevent focus theft from dropdown container
-  const handleDropdownMouseDown = useCallback((e: React.MouseEvent) => {
-    // Only prevent default if clicking on the dropdown container, not on SelectItems
-    const target = e.target as HTMLElement;
-    if (target.closest('[role="option"]')) return;
-    e.preventDefault();
-  }, []);
-
   // Handle search input changes with IME support
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!isComposing) {
-      setCountrySearch(e.target.value);
-    }
+    // Always update the input value immediately for responsive UI
+    const value = e.target.value;
+    setCountrySearch(value);
+    
+    // Don't prevent updates during composition
+    if (isComposing) return;
   }, [isComposing]);
 
   const handleCompositionStart = useCallback(() => {
@@ -297,15 +291,21 @@ export default function ContactForm() {
       setIsCountryDropdownOpen(false);
       setCountrySearch("");
     }
-    // Allow arrow keys and enter to navigate to options
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
-      const firstOption = document.querySelector('[role="option"]') as HTMLElement;
-      if (firstOption && e.key === 'ArrowDown') {
-        e.preventDefault();
-        firstOption.focus();
-      }
-    }
   }, []);
+
+  // Click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsCountryDropdownOpen(false);
+      }
+    };
+
+    if (isCountryDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isCountryDropdownOpen]);
 
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
@@ -319,6 +319,14 @@ export default function ContactForm() {
       countryIso2: "US",
     },
   });
+
+  // Handle country selection
+  const handleCountrySelect = useCallback((country: typeof allCountries[0]) => {
+    form.setValue('countryCode', country.dialCode);
+    form.setValue('countryIso2', country.iso2);
+    setIsCountryDropdownOpen(false);
+    setCountrySearch("");
+  }, [form]);
 
   const contactMutation = useMutation({
     mutationFn: async (data: ContactFormData & { recaptcha: string }) => {
@@ -454,86 +462,89 @@ export default function ContactForm() {
                   <FormField
                     control={form.control}
                     name="countryCode"
-                    render={({ field }) => (
-                      <FormItem className="w-48">
-                        <Select 
-                          onValueChange={(value) => {
-                            // Value format: "iso2:dialCode" (e.g., "US:+1")
-                            const [iso2, dialCode] = value.split(':');
-                            field.onChange(dialCode);
-                            form.setValue('countryIso2', iso2);
-                            setIsCountryDropdownOpen(false);
-                            setCountrySearch("");
-                          }} 
-                          defaultValue={`US:${field.value}`}
-                          onOpenChange={(open) => {
-                            setIsCountryDropdownOpen(open);
-                            if (open) {
-                              setCountrySearch("");
-                            }
-                          }}
-                        >
-                          <FormControl>
-                            <SelectTrigger data-testid="select-country-code" className="px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all">
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent 
-                            className="max-h-60"
-                            onMouseDown={handleDropdownMouseDown}
-                          >
-                            <div className="sticky top-0 bg-white p-2 border-b z-10">
-                              <div className="relative">
-                                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
-                                <Input
-                                  ref={searchInputRef}
-                                  placeholder="Search country or code..."
-                                  value={countrySearch}
-                                  onChange={handleSearchChange}
-                                  onCompositionStart={handleCompositionStart}
-                                  onCompositionEnd={handleCompositionEnd}
-                                  onKeyDown={handleSearchKeyDown}
-                                  onMouseDown={(e) => e.stopPropagation()}
-                                  onFocus={(e) => e.stopPropagation()}
-                                  className="pl-8 h-8 text-sm"
-                                  data-testid="search-country"
-                                  autoComplete="off"
-                                  role="searchbox"
-                                  aria-label="Search countries"
-                                />
-                              </div>
-                            </div>
-                            <div 
-                              className="max-h-48 overflow-y-auto"
-                              onMouseDown={(e) => {
-                                // Allow clicks on options to work properly
-                                const target = e.target as HTMLElement;
-                                if (!target.closest('[role="option"]')) {
-                                  e.preventDefault();
+                    render={({ field }) => {
+                      const selectedCountry = allCountries.find(c => c.dialCode === field.value) || allCountries[0];
+                      
+                      return (
+                        <FormItem className="w-48">
+                          <div className="relative" ref={dropdownRef}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsCountryDropdownOpen(!isCountryDropdownOpen);
+                                if (!isCountryDropdownOpen) {
+                                  setCountrySearch("");
                                 }
                               }}
+                              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-left bg-white flex items-center justify-between"
+                              data-testid="select-country-code"
+                              aria-expanded={isCountryDropdownOpen}
+                              aria-haspopup="listbox"
                             >
-                              {filteredCountries.map((country) => (
-                                <SelectItem 
-                                  key={country.iso2} 
-                                  value={`${country.iso2}:${country.dialCode}`}
-                                  tabIndex={-1}
-                                  onMouseDown={(e) => e.stopPropagation()}
-                                >
-                                  {country.flag} {country.name} ({country.dialCode})
-                                </SelectItem>
-                              ))}
-                              {filteredCountries.length === 0 && (
-                                <div className="p-4 text-center text-gray-500 text-sm" tabIndex={-1}>
-                                  No countries found
+                              <span className="flex items-center gap-2">
+                                <span>{selectedCountry.flag}</span>
+                                <span className="text-sm">{selectedCountry.dialCode}</span>
+                              </span>
+                              <svg
+                                className={`w-4 h-4 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </button>
+                            
+                            {isCountryDropdownOpen && (
+                              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
+                                <div className="sticky top-0 bg-white p-2 border-b z-10">
+                                  <div className="relative">
+                                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
+                                    <Input
+                                      ref={searchInputRef}
+                                      placeholder="Search country or code..."
+                                      value={countrySearch}
+                                      onChange={handleSearchChange}
+                                      onCompositionStart={handleCompositionStart}
+                                      onCompositionEnd={handleCompositionEnd}
+                                      onKeyDown={handleSearchKeyDown}
+                                      className="pl-8 h-8 text-sm"
+                                      data-testid="search-country"
+                                      autoComplete="off"
+                                      role="searchbox"
+                                      aria-label="Search countries"
+                                    />
+                                  </div>
                                 </div>
-                              )}
-                            </div>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                                <div className="max-h-48 overflow-y-auto">
+                                  {filteredCountries.map((country) => (
+                                    <button
+                                      key={country.iso2}
+                                      type="button"
+                                      className="w-full px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 flex items-center gap-2 text-sm"
+                                      onClick={() => handleCountrySelect(country)}
+                                      onMouseDown={(e) => e.preventDefault()}
+                                      tabIndex={-1}
+                                      role="option"
+                                    >
+                                      <span>{country.flag}</span>
+                                      <span>{country.name}</span>
+                                      <span className="text-gray-500 ml-auto">{country.dialCode}</span>
+                                    </button>
+                                  ))}
+                                  {filteredCountries.length === 0 && (
+                                    <div className="p-4 text-center text-gray-500 text-sm">
+                                      No countries found
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
                   <FormField
                     control={form.control}
