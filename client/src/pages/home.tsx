@@ -164,15 +164,15 @@ export default function Home() {
               </div>
               <div className="flex items-center gap-8 mt-12">
                 <div className="text-center" data-testid="stat-tutors">
-                  <div className="text-3xl font-bold text-blue-600">500+</div>
+                  <div className="text-3xl font-bold text-blue-600">75+</div>
                   <div className="text-gray-600">Expert Tutors</div>
                 </div>
                 <div className="text-center" data-testid="stat-students">
-                  <div className="text-3xl font-bold text-green-600">10,000+</div>
+                  <div className="text-3xl font-bold text-green-600">185+</div>
                   <div className="text-gray-600">Happy Students</div>
                 </div>
                 <div className="text-center" data-testid="stat-satisfaction">
-                  <div className="text-3xl font-bold text-orange-600">98%</div>
+                  <div className="text-3xl font-bold text-orange-600">91%</div>
                   <div className="text-gray-600">Satisfaction Rate</div>
                 </div>
               </div>
@@ -192,7 +192,7 @@ export default function Home() {
                     </div>
                     <div>
                       <div className="font-semibold text-gray-900">4.9/5 Rating</div>
-                      <div className="text-gray-600 text-sm">From 2,500+ reviews</div>
+                      <div className="text-gray-600 text-sm">From 185+ reviews</div>
                     </div>
                   </div>
                 </CardContent>
@@ -626,14 +626,6 @@ export default function Home() {
               data-testid="footer-cta"
             >
               Start Your Learning Journey
-            </Button>
-            <Button 
-              onClick={() => scrollToSection('about')} 
-              variant="outline"
-              className="border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-3 rounded-lg font-semibold transition-all"
-              data-testid="footer-learn-more"
-            >
-              Learn More About Us
             </Button>
           </div>
           

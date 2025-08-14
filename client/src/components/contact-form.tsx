@@ -17,6 +17,13 @@ const contactFormSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   subject: z.string().optional(),
   message: z.string().min(1, "Please enter your message"),
+  countryCode: z.string().optional(),
+  phone: z.string().optional().refine((phone) => {
+    if (!phone || phone.trim() === "") return true; // Optional field
+    // Basic phone validation - allows digits, spaces, dashes, parentheses
+    const phoneRegex = /^[\d\s\-\(\)\+]+$/;
+    return phoneRegex.test(phone) && phone.replace(/\D/g, "").length >= 7;
+  }, "Please enter a valid phone number"),
 });
 
 type ContactFormData = z.infer<typeof contactFormSchema>;
@@ -32,6 +39,8 @@ export default function ContactForm() {
       email: "",
       subject: "",
       message: "",
+      countryCode: "+1",
+      phone: "",
     },
   });
 
@@ -163,6 +172,72 @@ export default function ContactForm() {
                 )}
               />
               
+              <div>
+                <label className="text-sm font-semibold text-gray-700 block mb-2">Phone Number (optional)</label>
+                <div className="flex gap-2">
+                  <FormField
+                    control={form.control}
+                    name="countryCode"
+                    render={({ field }) => (
+                      <FormItem className="w-32">
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-country-code" className="px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all">
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="+1">🇺🇸 +1</SelectItem>
+                            <SelectItem value="+44">🇬🇧 +44</SelectItem>
+                            <SelectItem value="+49">🇩🇪 +49</SelectItem>
+                            <SelectItem value="+33">🇫🇷 +33</SelectItem>
+                            <SelectItem value="+39">🇮🇹 +39</SelectItem>
+                            <SelectItem value="+34">🇪🇸 +34</SelectItem>
+                            <SelectItem value="+31">🇳🇱 +31</SelectItem>
+                            <SelectItem value="+46">🇸🇪 +46</SelectItem>
+                            <SelectItem value="+47">🇳🇴 +47</SelectItem>
+                            <SelectItem value="+45">🇩🇰 +45</SelectItem>
+                            <SelectItem value="+41">🇨🇭 +41</SelectItem>
+                            <SelectItem value="+43">🇦🇹 +43</SelectItem>
+                            <SelectItem value="+32">🇧🇪 +32</SelectItem>
+                            <SelectItem value="+351">🇵🇹 +351</SelectItem>
+                            <SelectItem value="+7">🇷🇺 +7</SelectItem>
+                            <SelectItem value="+86">🇨🇳 +86</SelectItem>
+                            <SelectItem value="+81">🇯🇵 +81</SelectItem>
+                            <SelectItem value="+82">🇰🇷 +82</SelectItem>
+                            <SelectItem value="+91">🇮🇳 +91</SelectItem>
+                            <SelectItem value="+61">🇦🇺 +61</SelectItem>
+                            <SelectItem value="+64">🇳🇿 +64</SelectItem>
+                            <SelectItem value="+55">🇧🇷 +55</SelectItem>
+                            <SelectItem value="+52">🇲🇽 +52</SelectItem>
+                            <SelectItem value="+54">🇦🇷 +54</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input
+                            type="tel"
+                            placeholder="Enter your phone number"
+                            {...field}
+                            data-testid="input-phone"
+                            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              
               <FormField
                 control={form.control}
                 name="message"
@@ -234,12 +309,21 @@ export default function ContactForm() {
                 <p className="text-gray-600">support@topteachers.online</p>
               </div>
               
-              <div data-testid="contact-info-phone">
-                <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Phone className="text-white h-6 w-6" />
+              <div data-testid="contact-info-telegram">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="text-white h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0C5.374 0 0 5.373 0 12s5.374 12 12 12 12-5.373 12-12S18.626 0 12 0zm5.568 8.16l-1.74 8.206c-.131.616-.475.765-.963.475L12 14.64l-1.85 1.78c-.205.205-.376.376-.771.376l.274-3.891 7.066-6.384c.308-.273-.067-.426-.478-.153L8.378 11.49l-2.82-.881c-.612-.192-.622-.612.128-.906L19.176 6.98c.51-.192.957.123.792.906z"/>
+                  </svg>
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">Call Us</h4>
-                <p className="text-gray-600">1-800-TOP-TEACH</p>
+                <h4 className="font-semibold text-gray-900 mb-2">Message Us</h4>
+                <a 
+                  href="https://t.me/topteachersonline" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-700 transition-colors font-medium"
+                >
+                  @topteachersonline
+                </a>
               </div>
               
               <div data-testid="contact-info-hours">

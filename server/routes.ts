@@ -6,6 +6,12 @@ import { z } from "zod";
 
 const contactRequestSchema = insertContactSchema.extend({
   recaptcha: z.string().min(1, "reCAPTCHA verification required"),
+  phone: z.string().optional().refine((phone) => {
+    if (!phone || phone.trim() === "") return true; // Optional field
+    // Basic phone validation - allows digits, spaces, dashes, parentheses
+    const phoneRegex = /^[\d\s\-\(\)\+]+$/;
+    return phoneRegex.test(phone) && phone.replace(/\D/g, "").length >= 7;
+  }, "Please enter a valid phone number"),
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
