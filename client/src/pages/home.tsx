@@ -608,73 +608,42 @@ export default function Home() {
       <ContactForm />
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12" data-testid="footer">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div data-testid="footer-brand">
-              <div className="flex items-center mb-4">
-                <GraduationCap className="text-blue-600 text-2xl mr-2" />
-                <span className="text-xl font-bold">TopTeachers.online</span>
-              </div>
-              <p className="text-gray-400 mb-4">
-                Connecting students with expert tutors for personalized, effective online learning experiences.
-              </p>
-              <div className="flex space-x-4">
-                <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors" data-testid="social-facebook">
-                  <span className="sr-only">Facebook</span>
-                  <div className="w-6 h-6 bg-gray-400 rounded"></div>
-                </a>
-                <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors" data-testid="social-twitter">
-                  <span className="sr-only">Twitter</span>
-                  <div className="w-6 h-6 bg-gray-400 rounded"></div>
-                </a>
-                <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors" data-testid="social-linkedin">
-                  <span className="sr-only">LinkedIn</span>
-                  <div className="w-6 h-6 bg-gray-400 rounded"></div>
-                </a>
-                <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors" data-testid="social-instagram">
-                  <span className="sr-only">Instagram</span>
-                  <div className="w-6 h-6 bg-gray-400 rounded"></div>
-                </a>
-              </div>
-            </div>
-            
-            <div data-testid="footer-students">
-              <h4 className="text-lg font-semibold mb-4">For Students</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Find a Tutor</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Subject Areas</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Test Prep</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Student Resources</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Pricing</a></li>
-              </ul>
-            </div>
-            
-            <div data-testid="footer-tutors">
-              <h4 className="text-lg font-semibold mb-4">For Tutors</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Become a Tutor</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Tutor Requirements</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Teaching Tools</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Tutor Support</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Payment Info</a></li>
-              </ul>
-            </div>
-            
-            <div data-testid="footer-company">
-              <h4 className="text-lg font-semibold mb-4">Company</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Help Center</a></li>
-              </ul>
-            </div>
+      <footer className="bg-gradient-to-r from-gray-900 to-blue-900 text-white py-16" data-testid="footer">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="flex items-center justify-center mb-8">
+            <GraduationCap className="text-blue-400 text-3xl mr-3" />
+            <span className="text-2xl font-bold">TopTeachers.online</span>
           </div>
           
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400" data-testid="footer-copyright">
-            <p>&copy; 2024 TopTeachers.online. All rights reserved. | Made with ❤️ for better learning</p>
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+            Connecting students with expert tutors for personalized, effective online learning experiences that unlock your full potential.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12">
+            <Button 
+              onClick={() => scrollToSection('contact')} 
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-all transform hover:scale-105"
+              data-testid="footer-cta"
+            >
+              Start Your Learning Journey
+            </Button>
+            <Button 
+              onClick={() => scrollToSection('about')} 
+              variant="outline"
+              className="border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-3 rounded-lg font-semibold transition-all"
+              data-testid="footer-learn-more"
+            >
+              Learn More About Us
+            </Button>
+          </div>
+          
+          <div className="border-t border-gray-700 pt-8">
+            <p className="text-gray-400 text-lg">
+              &copy; 2024 TopTeachers.online. All rights reserved. | Made with ❤️ for better learning
+            </p>
+            <p className="text-gray-500 text-sm mt-2">
+              Empowering students worldwide through quality online education
+            </p>
           </div>
         </div>
       </footer>

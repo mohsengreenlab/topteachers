@@ -1,4 +1,4 @@
-import { contacts, type Contact, type InsertContact, type User, type InsertUser } from "@shared/schema";
+import { contacts, users, type Contact, type InsertContact, type User, type InsertUser } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -12,18 +12,18 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(contacts).where(eq(contacts.id, id));
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(contacts).where(eq(contacts.email, username));
+    const [user] = await db.select().from(users).where(eq(users.username, username));
     return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db
-      .insert(contacts)
+      .insert(users)
       .values(insertUser)
       .returning();
     return user;

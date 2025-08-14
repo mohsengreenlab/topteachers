@@ -47,8 +47,8 @@ export default function ContactForm() {
       });
       form.reset();
       // Reset reCAPTCHA if available
-      if (window.grecaptcha) {
-        window.grecaptcha.reset();
+      if ((window as any).grecaptcha) {
+        (window as any).grecaptcha.reset();
       }
       setRecaptchaToken("");
     },
