@@ -164,8 +164,11 @@ This creates all the tables your app needs in the database.
 ### Start the app with PM2
 
 ```bash
-# Create PM2 configuration
-cat > ecosystem.config.js << 'EOF'
+# First, build the production version
+npm run build
+
+# Create PM2 configuration (use .cjs extension for CommonJS)
+cat > ecosystem.config.cjs << 'EOF'
 module.exports = {
   apps: [{
     name: 'topteachers',
@@ -182,7 +185,7 @@ module.exports = {
 EOF
 
 # Start your app
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.cjs
 
 # Make sure it starts when the server reboots
 pm2 startup
@@ -255,17 +258,11 @@ sudo certbot renew --dry-run
 
 ---
 
-## Step 6: Configure Express for Proxy
+## Step 6: Express Proxy Configuration (Already Included)
 
-Your Express app needs to trust Nginx so reCAPTCHA can see real visitor IP addresses.
+Your Express app is already configured to trust Nginx for proper IP forwarding. This ensures reCAPTCHA receives real visitor IP addresses instead of the proxy's IP.
 
-Edit your server configuration to add:
-```javascript
-// In your Express app setup
-app.set('trust proxy', 1);
-```
-
-This tells Express that it's behind a proxy (Nginx) and should trust the IP addresses Nginx forwards.
+The configuration `app.set('trust proxy', 1);` is already in your server code, which tells Express to trust the X-Forwarded-For headers that Nginx sends.
 
 ---
 
