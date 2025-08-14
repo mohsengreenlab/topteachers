@@ -1,0 +1,70 @@
+Keep the current design, layout, copy tone, Captcha, and PostgreSQL functionality.
+Now make ONLY the following modifications:
+
+Form updates
+
+Add a “Phone Number” field with a country selector and dial code:
+
+Label text must be exactly “Phone Number” (do not include “(optional)”).
+
+Field remains optional (no change to validation requirements).
+
+Country dropdown must include all countries with name, flag, and dial code (e.g., “🇩🇪 Germany (+49)”).
+
+Store country_code (e.g., +49) and phone in PostgreSQL with the existing contact submission.
+
+Keep client-side validation; if provided, ensure plausible number format.
+
+Update the DB schema/migration and server handler to accept and persist these fields (both nullable).
+
+You may use a lightweight solution (e.g., an international telephone input with full country data) or an ISO-based dataset; ensure all countries are present.
+
+Header / Contact
+
+Replace any “Call us” phone number with a Telegram contact link:
+
+Use: https://t.me/topteachersonline
+
+Make it a prominent contact option (icon OK), and open in a new tab.
+
+Stats & copy changes (update every occurrence)
+
+Expert Tutors → 75+
+
+Happy Students → 185+ (appears in two places; update both)
+
+Satisfaction Rate → 91%
+
+Hero/CTA text “Join 10,000+ Happy Learners” → “Join 185+ Happy Learners”
+
+Footer updates
+
+Remove the bottom-of-page “Learn More About Us” button entirely.
+
+Remove the text “Made with ❤️ for better learning” from the footer.
+
+Change footer year 2024 → 2025 (keep any ©/company text intact).
+
+Constraints & notes
+
+Do not add new pages or routes; still a single-page app.
+
+Preserve all existing styles, layout, animations, Captcha, and submission flow.
+
+If stats/counters are defined in a config/constants file, update there to keep all instances in sync.
+
+Provide the minimal PostgreSQL migration for the new fields:
+
+country_code VARCHAR(8) NULL
+
+phone VARCHAR(32) NULL
+
+(Optionally include country_iso2 CHAR(2) NULL if your country dataset exposes it.)
+
+Deliverables
+
+Updated front-end (HTML/CSS/JS) reflecting the items above.
+
+Updated back-end handler and PostgreSQL migration for country_code and phone.
+
+Brief note in README or code comments summarizing what changed and where.

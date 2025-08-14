@@ -588,7 +588,7 @@ export default function Home() {
           <div className="text-center mt-12">
             <Card className="bg-gradient-to-r from-blue-600 to-green-600 p-8 text-white border-none" data-testid="cta-community">
               <CardContent className="p-0">
-                <h3 className="text-2xl font-bold mb-4">Join 10,000+ Happy Learners</h3>
+                <h3 className="text-2xl font-bold mb-4">Join 185+ Happy Learners</h3>
                 <p className="text-xl mb-6">Experience the difference personalized tutoring can make in your academic journey</p>
                 <Button 
                   onClick={() => scrollToSection('contact')} 
@@ -631,7 +631,7 @@ export default function Home() {
           
           <div className="border-t border-gray-700 pt-8">
             <p className="text-gray-400 text-lg">
-              &copy; 2024 TopTeachers.online. All rights reserved. | Made with ❤️ for better learning
+              &copy; 2025 TopTeachers.online. All rights reserved.
             </p>
             <p className="text-gray-500 text-sm mt-2">
               Empowering students worldwide through quality online education
