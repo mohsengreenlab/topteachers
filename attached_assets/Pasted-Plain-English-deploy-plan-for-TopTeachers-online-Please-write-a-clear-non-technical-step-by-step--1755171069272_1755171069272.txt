@@ -1,0 +1,91 @@
+Plain-English deploy plan for TopTeachers.online
+
+Please write a clear, non-technical, step-by-step guide to put my site TopTeachers.online on my Ubuntu VPS.
+Use everyday language. Explain what to do and why. Show commands only when needed, and explain them right after.
+
+Important background (don’t change these)
+
+The VPS already runs other apps. Do not reuse their internal ports or databases:
+
+Kerit uses port 3001 and a webhook on 3002, with PostgreSQL kerit_db. 
+TrustLine uses port 3003. SmartCover uses port 3004 and PostgreSQL smartcover_db.
+reePaper (Flask) uses port 8000 behind Nginx. 
+My new site must be isolated under its own Linux user.
+
+Cloudflare is used only for DNS (gray cloud). SSL must be issued and served on the VPS (Let’s Encrypt).
+
+The country dropdown search is already fixed; don’t change front-end behavior—just make sure it works after deploy.
+
+What to deliver (in plain English)
+
+Big picture first
+In 4–5 simple bullets, explain the journey: create a separate user, place the app, set environment values, choose database, run the app on an inside-only port, put Nginx in front, add SSL, and test Captcha + form.
+
+Create a separate home for the app
+
+Make a new Linux user named topteachers with its own folders for the app and logs.
+
+Say where files will live (e.g., /home/topteachers/projects/topteachers-app and /home/topteachers/logs).
+
+Briefly explain permissions in simple words.
+
+Pick a safe internal port and database
+
+Run the app only on 127.0.0.1:3005 (3001/3002/3003/3004/8000 are already used). Create a separate PostgreSQL database named topteachers_db and a database user just for it (for example, topteachers_user).
+
+Also show how to keep using Neon instead (if I prefer), and what to change in the environment value.
+
+Environment values (keep it human)
+
+List the important items to fill in: site URL, the inside port (3005), database URL, a long random session secret, and the Captcha keys (CAPTCHA_SITE_KEY and CAPTCHA_SECRET).
+
+Explain where to put this file (in the app folder) and that it stays private.
+
+Build and run the app
+
+My project is a React 18 + Vite front end and an Express (TypeScript) back end, with Drizzle ORM.
+
+Describe, in simple words, how to install dependencies, build the front end and server, run database migrations with Drizzle, and start the server with a process manager so it survives reboots.
+
+Use PM2 as the simple “keep it running” tool (explain what it is in one line).
+
+Keep the tone friendly and non-technical.
+
+Put Nginx in front + HTTPS on the VPS
+
+Explain that Nginx is the “reception desk” that answers the public, and quietly passes traffic to 127.0.0.1:3005.
+
+Show a short server-block example only if needed; otherwise focus on what it does.
+
+Use Let’s Encrypt on the VPS for topteachers.online (and www) and confirm auto-renew.
+
+Mention the security headers at a high level (no deep details).
+
+Keep Cloudflare set to DNS-only (gray cloud), since SSL ends on my VPS.
+
+Captcha must work after launch
+
+Front end uses the site key, server uses the secret.
+
+Remind to pass along the visitor’s IP correctly through the proxy and to enable “trust proxy” in Express so Captcha checks don’t get confused (say this in simple words). 
+Final checks (simple checklist)
+
+Open the site on HTTPS: page loads, styles and images look right.
+
+Submit the contact form with Captcha: I should see a success message and a new row in the database.
+
+Make sure Kerit (3001/3002), TrustLine (3003), SmartCover (3004), and FreePaper (8000) still work. 
+If something breaks
+
+Explain, in plain language, where to look at logs (app, Nginx, database) and the one-line commands to view them.
+
+Suggest turning on the basic firewall (allow SSH and the web) in a friendly, non-scary way.
+Gentle constraints (keep it simple)
+
+Do not touch the other apps, their ports, or their databases.
+
+Use a separate Linux user and your own app folders.
+
+Keep the app as a single page with the current features; don’t change the front end.
+
+Keep the language friendly and avoid heavy jargon. If you show a command or a short config, explain it in one sentence right after.
