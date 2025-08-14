@@ -6,6 +6,7 @@ This is a full-stack web application built with React, Express, and PostgreSQL. 
 
 Preferred communication style: Simple, everyday language.
 Recent feature request: Enhanced country dropdown with alphabetical sorting, comprehensive dataset, search functionality, persistent search field at top, and autofocus on open.
+Database preference: Use node-postgres (pg) with Drizzle for local development, with optional Neon support via USE_NEON=true flag.
 
 # System Architecture
 
@@ -25,7 +26,8 @@ Recent feature request: Enhanced country dropdown with alphabetical sorting, com
 - **Middleware**: Custom logging middleware for API requests with response capture
 
 ## Database Design
-- **Database**: PostgreSQL with connection pooling via Neon serverless
+- **Database**: PostgreSQL with connection pooling via node-postgres (pg), optional Neon support
+- **Connection**: Standard PostgreSQL connection with SSL support, configurable via USE_NEON flag
 - **Schema Management**: Drizzle Kit for migrations and schema generation
 - **Tables**: Users table for authentication and contacts table for form submissions
 - **Data Validation**: Zod schemas shared between client and server for consistent validation
